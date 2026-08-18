@@ -21,11 +21,13 @@ func TestReasonStringWireValues(t *testing.T) {
 		// Platform-side.
 		{ReasonQueuedExpired, "queued_expired"},
 		{ReasonRuntimeOffline, "runtime_offline"},
+		{ReasonRuntimeReconnectTimeout, "runtime_reconnect_timeout"},
 		{ReasonRuntimeRecovery, "runtime_recovery"},
 		{ReasonTimeout, "timeout"},
 		{ReasonIterationLimit, "iteration_limit"},
 		{ReasonAgentBlocked, "agent_blocked"},
 		{ReasonAPIInvalidRequest, "api_invalid_request"},
+		{ReasonSkillBundleUnavailable, "skill_bundle_unavailable"},
 		// Agent-side.
 		{ReasonAgentProviderAuthOrAccess, "agent_error.provider_auth_or_access"},
 		{ReasonAgentProviderQuotaLimit, "agent_error.provider_quota_limit"},
@@ -43,7 +45,7 @@ func TestReasonStringWireValues(t *testing.T) {
 		{ReasonAgentUnknown, "agent_error.unknown"},
 	}
 
-	if got, want := len(cases), 21; got != want {
+	if got, want := len(cases), 23; got != want {
 		t.Fatalf("constant count = %d, want %d (canonical taxonomy size)", got, want)
 	}
 
@@ -65,11 +67,13 @@ func TestIsAgentError(t *testing.T) {
 	platformSide := []Reason{
 		ReasonQueuedExpired,
 		ReasonRuntimeOffline,
+		ReasonRuntimeReconnectTimeout,
 		ReasonRuntimeRecovery,
 		ReasonTimeout,
 		ReasonIterationLimit,
 		ReasonAgentBlocked,
 		ReasonAPIInvalidRequest,
+		ReasonSkillBundleUnavailable,
 	}
 	for _, r := range platformSide {
 		if r.IsAgentError() {
@@ -110,8 +114,8 @@ func TestAllReasonsContents(t *testing.T) {
 	t.Parallel()
 
 	got := AllReasons()
-	if len(got) != 21 {
-		t.Fatalf("AllReasons() returned %d entries, want 21", len(got))
+	if len(got) != 24 {
+		t.Fatalf("AllReasons() returned %d entries, want 24", len(got))
 	}
 
 	seen := make(map[Reason]bool, len(got))
@@ -128,8 +132,8 @@ func TestAllReasonsContents(t *testing.T) {
 		}
 	}
 
-	if platformCount != 7 {
-		t.Errorf("AllReasons(): platform-side count = %d, want 7", platformCount)
+	if platformCount != 10 {
+		t.Errorf("AllReasons(): platform-side count = %d, want 10", platformCount)
 	}
 	if agentCount != 14 {
 		t.Errorf("AllReasons(): agent-side count = %d, want 14", agentCount)
@@ -140,9 +144,11 @@ func TestAllReasonsContents(t *testing.T) {
 	// someone adds a constant but forgets to register it in the
 	// allReasons slice.
 	required := []Reason{
-		ReasonQueuedExpired, ReasonRuntimeOffline, ReasonRuntimeRecovery,
+		ReasonQueuedExpired, ReasonRuntimeOffline, ReasonRuntimeReconnectTimeout,
+		ReasonRuntimeRecovery,
 		ReasonTimeout, ReasonIterationLimit, ReasonAgentBlocked,
-		ReasonAPIInvalidRequest,
+		ReasonAPIInvalidRequest, ReasonSkillBundleUnavailable,
+		ReasonRuntimeCLITimeout,
 		ReasonAgentProviderAuthOrAccess, ReasonAgentProviderQuotaLimit,
 		ReasonAgentProviderCapacityOrRateLimit, ReasonAgentProviderServerError,
 		ReasonAgentProviderNetwork, ReasonAgentProcessFailure,
